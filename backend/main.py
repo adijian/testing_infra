@@ -1,7 +1,9 @@
-import asyncio
+import time
+from asyncio import create_task
+
+import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
 
 from abstract.action import Action
 from abstract.test import Test
@@ -9,7 +11,7 @@ from abstract.test_bundle import TestBundle
 from abstract.test_bundle_collection import TestBundleCollection
 from abstract.test_runner import TestRunner
 from appsettings import port
-# from tests.test_one import TestOne
+from helpers.async_helper import create_task_request, async_request, run_action_async
 
 app = FastAPI()
 
@@ -26,12 +28,7 @@ app.add_middleware(
 # frontend requests number of test bundles to display in dropdown
 # user picks a test bundle
 # backend separates calls to a list and returns a list of actions
-# * do I iterate over list from backend?
 # * how will the user contact the frontend? -- use api call to contact front to return current test's logs?
-# * are test results HTTP results?-
-
-
-# how do I let the user store api responses as variables
 """
 
 
@@ -48,15 +45,19 @@ async def action():
 
 @app.get("/test")
 async def test():
-    import time
-    from abstract.test import Test
-
     class TestOne(Test):
         async def test_run(self):
             print("Running test one")
             self.start_time = time.time()
-            # await self.run_action("action")
-            await self.run_multiple_actions(["action", "action"])
+
+            await self.run_action_sync("action")
+
+            await self.run_multiple_actions_sync(["action", "action"])
+
+            action_instance = run_action_async('action')
+            # Do other stuff
+            await self.validate_task_completion("action", action_instance)
+
             self.end_time = time.time()
             self.elapsed_time = self.start_time - self.end_time
             return self.results

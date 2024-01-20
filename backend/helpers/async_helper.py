@@ -10,5 +10,9 @@ async def async_request(url):
             return data
 
 
-def create_task(task):
+def create_task_request(task):
     return asyncio.create_task(task)
+
+
+def run_action_async(task):
+    return asyncio.create_task(async_request(task))

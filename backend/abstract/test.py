@@ -11,10 +11,13 @@ class Test:
         self.end_time = None
         self.elapsed_time = None
 
-    async def run_action(self, path):
-        self.results.append({path: await create_task(async_request(path))})
+    async def validate_task_completion(self, path, task):
+        self.results.append({path: await task})
 
-    async def run_multiple_actions(self, paths: list):
+    async def run_action_sync(self, path):
+        self.results.append({path: await create_task_request(async_request(path))})
+
+    async def run_multiple_actions_sync(self, paths: list):
         tasks = [async_request(path) for path in paths]
         results = await asyncio.gather(*tasks)
         for i in range(len(results)):
