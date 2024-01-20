@@ -1,3 +1,4 @@
+import asyncio
 import time
 from asyncio import create_task
 
@@ -40,29 +41,36 @@ def get_all_urls(request: Request):
 
 @app.get("/action")
 async def action():
-    return await Action().run()
+    class ActionOne(Action):
+        async def action_run(self):
+            return await asyncio.sleep(3)
+
+    return await ActionOne('action').run()
 
 
 @app.get("/test")
 async def test():
     class TestOne(Test):
         async def test_run(self):
-            print("Running test one")
-            self.start_time = time.time()
+            # await self.run_action_sync("action")
+            #
+            # action_instance = run_action_async('action')
+            # # Do other stuff
+            # await self.validate_action_completion(action_instance)
+            #
+
+            list_of_instances = []
+            for i in range(10):
+                list_of_instances.append(run_action_async('action'))
+            # Do other stuff
 
             await self.run_action_sync("action")
 
-            await self.run_multiple_actions_sync(["action", "action"])
-
-            action_instance = run_action_async('action')
-            # Do other stuff
-            await self.validate_task_completion("action", action_instance)
-
-            self.end_time = time.time()
-            self.elapsed_time = self.start_time - self.end_time
+            for i in range(len(list_of_instances)):
+                await self.validate_action_completion(list_of_instances[i])
             return self.results
 
-    return await TestOne().run()
+    return await TestOne('test').run()
 
 
 @app.get("/test_bundle")
