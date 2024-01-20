@@ -1,15 +1,16 @@
-import time
 from abc import abstractmethod
 from datetime import datetime
 
+from abstract.results import Results
 from helpers.async_helper import *
 
 
 class Test:
     def __init__(self, name):
-        self.name = name + datetime.now().strftime("_%d-%m-%Y%H:%M:%S.%f")[:-3]
+        self.test_name = name + datetime.now().strftime("_%d-%m-%Y%H:%M:%S.%f")[:-3]
+        self.error = Results.NONE.value
         self.results = []
-        self.start_time = time.time()
+        self.start_time = None
         self.end_time = None
         self.elapsed_time = None
 
@@ -39,19 +40,30 @@ class Test:
             self.results.append(paths[i] + " " + results[i])
 
     async def run(self):
-        print("Running test", self.name)
-
-        self.start_time = time.time()
+        print("Running test", self.test_name)
+        format_date = '%Y-%m-%d %H:%M:%S'
+        self.start_time = datetime.now().strftime(format_date)
 
         run_test = await self.test_run()
 
-        self.end_time = time.time()
-        self.elapsed_time = round((self.end_time - self.start_time) / 60, 2)
+        self.end_time = datetime.now().strftime(format_date)
+        self.elapsed_time = round((datetime.strptime(self.end_time, format_date) - datetime.strptime(self.start_time, format_date)).total_seconds() / 60, 2)
 
-        print("Finished test", self.name, "in", self.elapsed_time, "minutes")
+        print("Finished test", self.test_name, "in", self.elapsed_time, "minutes")
 
-        return run_test
+        self.error = Results.PASS.value
+        return {self.to_string(): run_test}
 
     @abstractmethod
     async def test_run(self):
         pass
+
+    def to_string(self):
+        string = {
+            'test_name': self.test_name,
+            'error': self.error,
+            'start_time': self.start_time,
+            'end_time': self.end_time,
+            'elapsed_time': self.elapsed_time
+        }
+        return f"{string}"

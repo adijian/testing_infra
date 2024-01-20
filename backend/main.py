@@ -60,11 +60,11 @@ async def test():
             #
 
             list_of_instances = []
-            for i in range(10):
+            for i in range(2):
                 list_of_instances.append(run_action_async('action'))
             # Do other stuff
 
-            await self.run_action_sync("action")
+            # await self.run_action_sync("action")
 
             for i in range(len(list_of_instances)):
                 await self.validate_action_completion(list_of_instances[i])
@@ -75,18 +75,20 @@ async def test():
 
 @app.get("/test_bundle")
 def test_bundle():
-    return TestBundle(tests=[
-        "test",
-        "test"
-    ]).run()
+    return TestBundle(name="test_bundle",
+                      tests=[
+                          "test",
+                          "test"
+                      ]).run()
 
 
 @app.get("/test_bundle_collection")
 def test_bundle_collection():
-    return TestBundleCollection(collection=[
-        "test_bundle",
-        "test_bundle"
-    ]).run()
+    return TestBundleCollection(name="test_collection",
+                                collection=[
+                                    "test_bundle",
+                                    "test_bundle"
+                                ]).run()
 
 
 if __name__ == "__main__":

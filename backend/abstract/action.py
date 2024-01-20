@@ -1,27 +1,27 @@
-import time
 import uuid
 from abc import abstractmethod
+from datetime import datetime
+
 from abstract.results import Results
 
 
 class Action:
     def __init__(self, action: str):
-        id_num = uuid.uuid4().hex[:6]
-        self.action_name = action + "_" + id_num
-        self.id = id_num
+        self.action_name = action + "_" + uuid.uuid4().hex[:6]
         self.error = Results.NONE.value
-        self.start_time = time.time()
+        self.start_time = None
         self.end_time = None
         self.elapsed_time = None
 
     async def run(self):
         print("Running action", self.action_name)
-        self.start_time = time.time()
+        format_date = '%Y-%m-%d %H:%M:%S'
+        self.start_time = datetime.now().strftime(format_date)
 
         await self.action_run()
 
-        self.end_time = time.time()
-        self.elapsed_time = round((self.end_time - self.start_time) / 60, 2)
+        self.end_time = datetime.now().strftime(format_date)
+        self.elapsed_time = round((datetime.strptime(self.end_time, format_date) - datetime.strptime(self.start_time, format_date)).total_seconds() / 60, 2)
 
         self.error = Results.PASS.value
 
