@@ -1,14 +1,9 @@
-import time
 from singleton_decorator import singleton
 
 
 @singleton
 class TestRunner:
     def __init__(self):
-        self.results = []
-        self.start_time = time.time()
-        self.end_time = None
-        self.elapsed_time = None
         self.is_running = False
 
     @property
