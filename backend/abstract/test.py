@@ -1,5 +1,4 @@
 from abc import abstractmethod
-from datetime import datetime
 
 from abstract.report_details import ReportDetails
 from helpers.async_helper import *
@@ -39,28 +38,14 @@ class Test(ReportDetails):
 
     async def run(self):
         print("Running test", self.name)
-        self.start_time = datetime.now().strftime(self.format_date)
+        self.start_timer()
 
         run_test = await self.test_run()
 
-        self.end_time = datetime.now().strftime(self.format_date)
-        self.elapsed_time = round((datetime.strptime(self.end_time, self.format_date) - datetime.strptime(self.start_time, self.format_date)).total_seconds() / 60, 2)
-
-        print("Finished test", self.name, "in", self.elapsed_time, "minutes")
-
-        self.error = self.Results.PASS.value
+        self.stop_timer()
         return {self.to_string(): run_test}
 
     @abstractmethod
     async def test_run(self):
         pass
 
-    # def to_string(self):
-    #     string = {
-    #         'test_name': self.test_name,
-    #         'error': self.error,
-    #         'start_time': self.start_time,
-    #         'end_time': self.end_time,
-    #         'elapsed_time': self.elapsed_time
-    #     }
-    #     return f"{string}"

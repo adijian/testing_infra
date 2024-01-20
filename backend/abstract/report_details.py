@@ -11,7 +11,6 @@ class ReportDetails:
         self.end_time = None
         self.format_date = '%Y-%m-%d %H:%M:%S'
 
-
     class TypeOfTestContainers(enum.Enum):
         TEST = "Test"
         TEST_BUNDLE = "TestBundle"
@@ -34,3 +33,14 @@ class ReportDetails:
         }
         return f"{string}"
 
+    def start_timer(self):
+        print("Running action", self.name, "at", self.start_time)
+        self.start_time = datetime.now().strftime(self.format_date)
+
+    def stop_timer(self):
+        self.end_time = datetime.now().strftime(self.format_date)
+        self.elapsed_time = round((datetime.strptime(self.end_time, self.format_date) - datetime.strptime(self.start_time, self.format_date)).total_seconds() / 60, 2)
+
+        print("Finished test", self.name, "in", self.elapsed_time, "minutes")
+
+        self.error = self.Results.PASS.value
