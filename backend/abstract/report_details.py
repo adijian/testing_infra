@@ -1,6 +1,8 @@
 import enum
 from datetime import datetime
 
+from abstract.test_runner import TestRunner
+
 
 class ReportDetails:
     def __init__(self, name):
@@ -10,6 +12,7 @@ class ReportDetails:
         self.start_time = None
         self.end_time = None
         self.format_date = '%Y-%m-%d %H:%M:%S'
+        self.runner = TestRunner()
 
     class TypeOfTestContainers(enum.Enum):
         TEST = "Test"
@@ -34,13 +37,13 @@ class ReportDetails:
         return f"{string}"
 
     def start_timer(self):
-        print("Running action", self.name, "at", self.start_time)
         self.start_time = datetime.now().strftime(self.format_date)
+        print(self.start_time, ": Running", self.name)
 
     def stop_timer(self):
         self.end_time = datetime.now().strftime(self.format_date)
         self.elapsed_time = round((datetime.strptime(self.end_time, self.format_date) - datetime.strptime(self.start_time, self.format_date)).total_seconds() / 60, 2)
 
-        print("Finished test", self.name, "in", self.elapsed_time, "minutes")
+        print(self.end_time, ": Finished", self.name, "in", self.elapsed_time, "minutes", "with error:", self.error)
 
         self.error = self.Results.PASS.value

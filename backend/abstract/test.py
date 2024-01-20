@@ -21,7 +21,7 @@ class Test(ReportDetails):
     async def run_action_sync(self, path):
         """
         Starts and waits for the result of an action
-        :param path:
+        :param path: the action to start running
         """
         self.results.append(await create_task_request(async_request(path)))
 
@@ -29,7 +29,6 @@ class Test(ReportDetails):
         """
         Runs multiple actions and waits for their results
         :param paths:
-        :return:
         """
         tasks = [async_request(path) for path in paths]
         results = await asyncio.gather(*tasks)
@@ -37,12 +36,13 @@ class Test(ReportDetails):
             self.results.append(paths[i] + " " + results[i])
 
     async def run(self):
-        print("Running test", self.name)
         self.start_timer()
+        self.runner.running_test = []
 
         run_test = await self.test_run()
 
         self.stop_timer()
+        self.runner.running_test = []
         return {self.to_string(): run_test}
 
     @abstractmethod

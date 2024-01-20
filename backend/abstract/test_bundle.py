@@ -14,11 +14,12 @@ class TestBundle(ReportDetails):
 
     def run(self):
         self.start_timer()
+        self.runner.running_bundle = self
 
         for test in self.tests:
             response = requests.get(f"{address}/{test}")
             self.results.append(response.json())
 
         self.stop_timer()
-
+        self.runner.running_bundle = []
         return {self.to_string(): self.results}
