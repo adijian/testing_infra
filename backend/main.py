@@ -1,10 +1,13 @@
 import asyncio
 import time
 from asyncio import create_task
+from typing import List
 
+import requests
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.websockets import WebSocket, WebSocketDisconnect
 
 from abstract.action import Action
 from abstract.test import Test
@@ -89,6 +92,43 @@ def test_bundle_collection():
                                     "test_bundle",
                                     "test_bundle"
                                 ]).run()
+
+
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: List[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    async def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    async def send_message(self, message: str):
+        for connection in self.active_connections:
+            await connection.send_text(message)
+
+
+manager = ConnectionManager()
+
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            await manager.send_message(f"Message text was: {data}")
+    except WebSocketDisconnect:
+        await manager.disconnect(websocket)
+
+
+@app.post("/message")
+async def send_message_to_ws(message: str):
+    if not manager.active_connections:
+        raise HTTPException(status_code=404, detail="No active websocket connections")
+    await manager.send_message(message)
 
 
 if __name__ == "__main__":
